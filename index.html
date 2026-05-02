@@ -10,17 +10,17 @@
   <header class="site-header">
     <div class="site-frame site-header-inner">
       <div class="site-brand">
-        <h1>LaysNet</h1>
-        <p>Graph-based Markov memory and Markov-memory classifier documentation for your project.</p>
+        <p class="eyebrow">LaysNet</p>
+        <h1>Graph Markov Memory Classifier</h1>
+        <p>Documentation for your project with installation, API, math, training, and Colab workflows in a responsive website layout.</p>
       </div>
       <nav class="site-nav">
         <a href="#overview">Overview</a>
         <a href="#install">Install</a>
         <a href="#quickstart">Quick Start</a>
         <a href="#internals">Internals</a>
+        <a href="#math">Math</a>
         <a href="#api">API</a>
-        <a href="#training">Train & Test</a>
-        <a href="#colab">Colab</a>
       </nav>
     </div>
   </header>
@@ -33,6 +33,7 @@
         <a href="#install">Install</a>
         <a href="#quickstart">Quick Start</a>
         <a href="#internals">Internals</a>
+        <a href="#math">Math</a>
         <a href="#api">API Reference</a>
         <a href="#training">Train & Test</a>
         <a href="#colab">Google Colab</a>
@@ -42,47 +43,54 @@
     </aside>
 
     <article class="article-wrapper">
-      <section id="overview" class="section">
-        <h2>Overview</h2>
-        <p>LaysNet is a pure Python research prototype for graph-based classification. It uses deterministic projections, stage-wise quantization, semaphore routing, and Markov edge memory rather than neural backpropagation.</p>
-        <div class="card-grid">
-          <div class="card">
-            <h3>What it does</h3>
-            <ul>
-              <li>Encodes numeric input into symbolic graph stages.</li>
-              <li>Stores class-conditioned node and edge counts.</li>
-              <li>Predicts using smoothed log-probabilities.</li>
-              <li>Returns an explainable route and trace.</li>
-            </ul>
+      <section id="overview" class="section hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Pure Python</span>
+          <h2>Train with real project data, not dummy examples.</h2>
+          <p>Use LaysNet for tabular and flattened image classification with a graph memory model. The docs include setup, training, test flows, code examples, and built-in math explanation.</p>
+          <div class="hero-actions">
+            <a class="button" href="#install">Install</a>
+            <a class="button secondary" href="#quickstart">Quick Start</a>
           </div>
-          <div class="card">
-            <h3>Why use it</h3>
-            <ul>
-              <li>No required NumPy, PyTorch, or scikit-learn for core use.</li>
-              <li>CPU-friendly and inspectable.</li>
-              <li>Works with your real project data and CSV datasets.</li>
-              <li>Supports both tabular and flattened image inputs.</li>
-            </ul>
-          </div>
+        </div>
+        <div class="hero-meta card">
+          <h3>Why LaysNet?</h3>
+          <ul>
+            <li>Graph-based memory model</li>
+            <li>Explainable prediction trace</li>
+            <li>Minimal dependencies</li>
+            <li>Real dataset workflow support</li>
+          </ul>
         </div>
       </section>
 
       <section id="install" class="section">
         <h2>Install</h2>
-        <p>Install locally from your repository clone for development or use in Colab.</p>
-        <pre><code>python3 -m venv .venv
+        <p>Set up the package locally from the repository.</p>
+        <div class="code-card">
+          <div class="code-title">Local install</div>
+          <pre><code>python3 -m venv .venv
 . .venv/bin/activate
 pip install -e .</code></pre>
-        <p>Install optional dataset and image helpers:</p>
-        <pre><code>pip install -e "[datasets]"</code></pre>
-        <p>Confirm installation with a quick smoke test:</p>
-        <pre><code>python3 -m laysnet</code></pre>
+        </div>
+        <div class="code-card">
+          <div class="code-title">Optional extras</div>
+          <pre><code>pip install -e "[datasets]"
+# or in Colab
+!pip install pillow</code></pre>
+        </div>
+        <div class="code-card">
+          <div class="code-title">Smoke test</div>
+          <pre><code>python3 -m laysnet</code></pre>
+        </div>
       </section>
 
       <section id="quickstart" class="section">
         <h2>Quick Start</h2>
-        <p>Use the bundled Iris dataset and project helpers to run a real train/test workflow.</p>
-        <pre><code>from laysnet import LaysNetClassifier
+        <p>Run the bundled Iris workflow or swap in your own CSV dataset immediately.</p>
+        <div class="code-card">
+          <div class="code-title">Iris train/test example</div>
+          <pre><code>from laysnet import LaysNetClassifier
 from laysnet.datasets import load_iris_dataset, stratified_train_test_split
 
 X, y = load_iris_dataset()
@@ -97,62 +105,102 @@ model = LaysNetClassifier(
 )
 model.fit(X_train, y_train)
 print("accuracy:", model.score(X_test, y_test))
-print("prediction:", model.predict_one(X_test[0]))
 print("trace:", model.trace_one(X_test[0]))</code></pre>
+        </div>
         <div class="callout">
-          <strong>Use your real data</strong>
-          <p>The project has a real bundled Iris dataset in <code>laysnet/data/iris.csv</code>. Replace this with your own dataset using <code>load_csv_dataset</code> for correct training and testing.</p>
+          <strong>Use your own project data</strong>
+          <p>Replace <code>load_iris_dataset</code> with <code>load_csv_dataset("data/my_data.csv", label_column=-1, has_header=True)</code> to run this on your real dataset.</p>
         </div>
       </section>
 
       <section id="internals" class="section">
-        <h2>Model internals</h2>
-        <div class="section-block">
-          <p>LaysNet trains by:</p>
-          <ol>
-            <li>Standardizing input features if <code>normalize=True</code>.</li>
-            <li>Projecting each vector with deterministic seed-based projection weights.</li>
-            <li>Quantizing projection values into one of <code>bins</code> codes per stage.</li>
-            <li>Storing class-labeled node and directed edge visit counts.</li>
-            <li>Scoring routes using class prior, node evidence, and edge transition evidence.</li>
-          </ol>
-          <p>During prediction, the model:</p>
-          <ol>
-            <li>Encodes the input vector with learned thresholds.</li>
-            <li>Routes each encoded stage through the semaphore router.</li>
-            <li>Computes smoothed log-scores for every candidate label.</li>
-            <li>Selects the highest-scoring label and returns a prediction trace.</li>
-          </ol>
+        <h2>Internals</h2>
+        <p>Understand the model flow from raw features to graph memory.</p>
+        <div class="card-grid">
+          <div class="card">
+            <h3>Encoder</h3>
+            <p>Standardizes input features, then projects each input vector using deterministic seed-based weights.</p>
+          </div>
+          <div class="card">
+            <h3>Quantizer</h3>
+            <p>Partitions projections into <code>bins</code> discrete codes using training thresholds.</p>
+          </div>
+          <div class="card">
+            <h3>Graph memory</h3>
+            <p>Stores node counts, node-label counts, edge counts, and edge-label counts for route scoring.</p>
+          </div>
         </div>
+        <div class="section-block">
+          <h3>Prediction trace</h3>
+          <p>Each prediction returns an explainable trace with:</p>
+          <ul>
+            <li>encoded stage codes</li>
+            <li>semaphore-routed graph nodes</li>
+            <li>class log-scores</li>
+            <li>Euler balance error</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="math" class="section">
+        <h2>Math</h2>
+        <p>The model uses deterministic projection, quantization, and smoothed log-probability scoring.</p>
+        <details>
+          <summary>Encoding formulas</summary>
+          <div class="math-block">
+            <p><strong>Projection:</strong> <code>p_s = x · w_s</code></p>
+            <p><strong>Code assignment:</strong> <code>c_s = bisect_right(thresholds_s, p_s)</code></p>
+            <p>Each stage <code>s</code> maps a projected value to one of <code>bins</code> discrete symbols.</p>
+          </div>
+        </details>
+        <details>
+          <summary>Scoring formulas</summary>
+          <div class="math-block">
+            <p><strong>Label prior:</strong></p>
+            <pre><code>P(y) = (count(y) + α) / (N + αK)</code></pre>
+            <p><strong>Node probability:</strong></p>
+            <pre><code>P(node | y) = (count_y(node) + α) / (count(node) + αK)</code></pre>
+            <p><strong>Edge probability:</strong></p>
+            <pre><code>P(edge | y) = (count_y(edge) + α) / (count(edge) + αK)</code></pre>
+            <p>The final log score is:</p>
+            <pre><code>score(y) = log P(y)
+  + node_weight * Σ log P(node | y)
+  + transition_weight * Σ log P(edge | y)</code></pre>
+          </div>
+        </details>
+        <details>
+          <summary>Route diagnostics</summary>
+          <div class="math-block">
+            <p>The Euler balance error measures directed imbalance:</p>
+            <pre><code>error = Σ |outdeg(node) - indeg(node)|</code></pre>
+            <p>Lower values imply more balanced directed transitions along the predicted route.</p>
+          </div>
+        </details>
       </section>
 
       <section id="api" class="section">
         <h2>API Reference</h2>
         <div class="api-grid">
           <div class="card">
-            <h3>Core API</h3>
+            <h3>Core classes</h3>
             <ul>
-              <li><code>LaysNetClassifier</code> — core classifier implementation.</li>
-              <li><code>LaysNetEnsembleClassifier</code> — average multiple graph models.</li>
-              <li><code>SequentialGraphNetwork</code> — torch-like pipeline builder.</li>
-              <li><code>GraphEncoder</code>, <code>SemaphoreRouter</code>, <code>MarkovMemory</code> — pipeline layers.</li>
+              <li><code>LaysNetClassifier</code> — main classifier.</li>
+              <li><code>LaysNetEnsembleClassifier</code> — average multiple models.</li>
+              <li><code>SequentialGraphNetwork</code> — torch-like pipeline API.</li>
             </ul>
           </div>
           <div class="card">
-            <h3>Key methods</h3>
+            <h3>Pipeline layers</h3>
             <ul>
-              <li><code>model.fit(X, y)</code></li>
-              <li><code>model.predict(X)</code></li>
-              <li><code>model.predict_one(row)</code></li>
-              <li><code>model.score(X, y)</code></li>
-              <li><code>model.trace_one(row)</code></li>
-              <li><code>model.graph_summary()</code></li>
-              <li><code>model.export_graph()</code></li>
+              <li><code>GraphEncoder</code></li>
+              <li><code>SemaphoreRouter</code></li>
+              <li><code>MarkovMemory</code></li>
             </ul>
           </div>
         </div>
-        <h3>Layer pipeline example</h3>
-        <pre><code>import laysnet.nn as lnn
+        <div class="code-card">
+          <div class="code-title">Layer API example</div>
+          <pre><code>import laysnet.nn as lnn
 
 model = lnn.SequentialGraphNetwork(
     lnn.GraphEncoder(steps=24, bins=11, seed=5),
@@ -164,12 +212,15 @@ output = model.forward(X_test[0])
 print(output.label)
 print(output.encoded)
 print(output.route)</code></pre>
+        </div>
       </section>
 
       <section id="training" class="section">
         <h2>Train & Test</h2>
-        <p>Split your data with the built-in helper and train using real CSV data from your project.</p>
-        <pre><code>from laysnet.datasets import load_csv_dataset, stratified_train_test_split
+        <p>Use your actual CSV dataset and built-in split helpers rather than dummy data.</p>
+        <div class="code-card">
+          <div class="code-title">Real dataset workflow</div>
+          <pre><code>from laysnet.datasets import load_csv_dataset, stratified_train_test_split
 from laysnet import LaysNetClassifier
 
 X, y = load_csv_dataset("data/my_data.csv", label_column=-1, has_header=True)
@@ -185,15 +236,17 @@ model = LaysNetClassifier(
 model.fit(X_train, y_train)
 print("test accuracy:", model.score(X_test, y_test))
 print("graph summary:", model.graph_summary())</code></pre>
-        <p>For project-specific validation, use your dataset file and label column instead of synthetic examples.</p>
-        <p>Compare on Iris with the repo script:</p>
+        </div>
+        <p>Use the repo compare script for a full benchmark table:</p>
         <pre><code>python3 examples/compare_iris.py</code></pre>
       </section>
 
       <section id="colab" class="section">
         <h2>Google Colab</h2>
-        <p>Run LaysNet in Colab. No GPU is required, but you can still use Colab for convenience.</p>
-        <pre><code>!pip install git+https://github.com/ahmadshajahan2000-commits/LaysNet.git
+        <p>Run the package in Colab with no GPU required. Use the same real dataset workflow as local install.</p>
+        <div class="code-card">
+          <div class="code-title">Colab install & usage</div>
+          <pre><code>!pip install git+https://github.com/ahmadshajahan2000-commits/LaysNet.git
 !python -m laysnet
 
 from laysnet.datasets import load_iris_dataset, stratified_train_test_split
@@ -209,20 +262,22 @@ model = SequentialGraphNetwork(
 )
 model.fit(X_train, y_train)
 print("accuracy:", model.score(X_test, y_test))</code></pre>
-        <p>Install optional image support if needed:</p>
-        <pre><code>!pip install pillow</code></pre>
+        </div>
       </section>
 
       <section id="images" class="section">
-        <h2>Image Dataset Training</h2>
-        <p>The repository includes an image folder training script. Use your real image dataset in the required structure.</p>
-        <pre><code>data/animals/train/cat/*.jpg
+        <h2>Image Training</h2>
+        <p>Train on your real image dataset by organizing labels into class folders.</p>
+        <div class="code-card">
+          <div class="code-title">Image folder layout</div>
+          <pre><code>data/animals/train/cat/*.jpg
  data/animals/train/dog/*.jpg
  data/animals/test/cat/*.jpg
  data/animals/test/dog/*.jpg
 
 python3 examples/train_image_folder.py --data data/animals --image-size 16</code></pre>
-        <p>The script converts images to grayscale, resizes them, flattens pixels, and passes them to LaysNet.</p>
+        </div>
+        <p>The script loads images as grayscale, resizes, flattens, and trains LaysNet.</p>
       </section>
 
       <section id="resources" class="section">
@@ -230,11 +285,11 @@ python3 examples/train_image_folder.py --data data/animals --image-size 16</code
         <div class="section-block">
           <ul>
             <li><strong>Bundled Iris data:</strong> <code>laysnet/data/iris.csv</code></li>
-            <li><strong>Project data copy:</strong> <code>datasets/iris.csv</code></li>
-            <li><strong>Comparison report:</strong> <code>reports/iris_comparison.md</code></li>
+            <li><strong>Project copy:</strong> <code>datasets/iris.csv</code></li>
+            <li><strong>Report output:</strong> <code>reports/iris_comparison.md</code></li>
             <li><strong>Additional docs:</strong> <code>docs/user_guide.md</code>, <code>docs/architecture.md</code>, <code>docs/pipeline.md</code>, <code>docs/colab_quickstart.md</code></li>
           </ul>
-          <p>LaysNet is research software. It is designed for experimentation, honest comparisons, and small-scale datasets.</p>
+          <p>LaysNet is research software for experimentation and honest comparison. Use your own data and validate results for your project.</p>
         </div>
       </section>
     </article>
@@ -242,7 +297,7 @@ python3 examples/train_image_folder.py --data data/animals --image-size 16</code
 
   <footer class="site-footer site-frame">
     <div class="footer-grid">
-      <p>Created from the LaysNet repository. White responsive documentation layout for project use.</p>
+      <p>Created from the LaysNet repository. Responsive documentation for code, math, and real datasets.</p>
       <a class="button" href="https://github.com/ahmadshajahan2000-commits/LaysNet">GitHub repo</a>
     </div>
   </footer>
